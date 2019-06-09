@@ -1,4 +1,4 @@
--e .[test]
+-e .[tests]
 black
 flake8
 isort

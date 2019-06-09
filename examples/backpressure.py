@@ -41,7 +41,7 @@ def with_futures():
         "block and not respond to KeyboardInterrupts, a SIGINT will "
         "be required to stop it, are you sure you want to continue? [Y/n] "
     )
-    if response == 'n':
+    if response == "n":
         print("Aborting as requested")
         return
 
@@ -54,4 +54,3 @@ if len(sys.argv) > 1 and sys.argv[1] == "futures":
     with_futures()
 else:
     with_futureproof()
-

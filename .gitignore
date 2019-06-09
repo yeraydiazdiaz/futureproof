@@ -7,3 +7,5 @@
 build/
 dist/
 .coverage
+.tox
+coverage.xml
