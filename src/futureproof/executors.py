@@ -14,9 +14,9 @@ class FutureProofExecutor:
 
     def __init__(self, *args, **kwargs):  # TODO: use only 3.7 [kw]args?
         self._executor = self._EXECUTOR_CLASS(*args, **kwargs)
-        self._current_futures: typing.Set = set()
-        self._current_futures_lock: Lock = Lock()
-        self._monitor_future: futures.Future = None
+        self._current_futures = set()  # type: set
+        self._current_futures_lock = Lock()  # type: Lock
+        self._monitor_future = None  # type: futures.Future
 
     def __enter__(self):
         return self
