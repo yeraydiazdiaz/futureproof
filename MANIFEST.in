@@ -1,0 +1,5 @@
+include LICENSE
+
+# Tests
+include tox.ini .coveragerc conftest.py
+recursive-include tests *.py

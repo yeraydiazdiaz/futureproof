@@ -11,11 +11,13 @@ def read_file(filepath):
         return fd.read()
 
 
+META_PATH = os.path.join(HERE, "src", "futureproof", "__init__.py")
+META_FILE = read_file(META_PATH)
+
+
 def find_meta(name):
-    meta_path = os.path.join(HERE, "src", "futureproof", "__init__.py")
-    contents = read_file(meta_path)
     dunder_name = "__" + name + "__"
-    string = contents[contents.index(dunder_name) :]
+    string = META_FILE[META_FILE.index(dunder_name) :]
     try:
         return re.match(r'.*__{0}__ = [\'"]([^\'"]+)[\'"]'.format(name), string).group(
             1
@@ -24,7 +26,7 @@ def find_meta(name):
         raise RuntimeError("Unable to find meta value.")
 
 
-EXTRAS_REQUIRE = {"test": ["pytest-mock", "pytest-timeout"]}
+EXTRAS_REQUIRE = {"tests": ["pytest-mock", "pytest-timeout", "coverage"]}
 
 CLASSIFIERS = [
     "Development Status :: 3 - Alpha",

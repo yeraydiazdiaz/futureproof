@@ -1,8 +1,15 @@
-[coverage:run]
-source=src/futureproof
-branch=True
+[run]
+branch = True
+source =
+    futureproof
 
-[coverage:report]
+[paths]
+source =
+   src/futureproof
+   .tox/*/lib/python*/site-packages/futureproof
+   .tox/pypy/site-packages/futureproof
+
+[report]
 exclude_lines =
     if self.debug:
     pragma: no cover
