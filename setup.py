@@ -24,7 +24,7 @@ def find_meta(name):
         raise RuntimeError("Unable to find meta value.")
 
 
-EXTRAS_REQUIRE = {"test": ["pytest-mock", "pytest-timeout", "pytest-cov"]}
+EXTRAS_REQUIRE = {"test": ["pytest-mock", "pytest-timeout"]}
 
 CLASSIFIERS = [
     "Development Status :: 3 - Alpha",

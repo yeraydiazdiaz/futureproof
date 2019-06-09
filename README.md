@@ -1,6 +1,4 @@
-# Futureproof
-
-> Bulletproof concurrent.futures
+# Futureproof - Bulletproof concurrent.futures
 
 [`concurrent.futures`](https://docs.python.org/3/library/concurrent.futures.html) is amazing, but it's got some sharp edges that have bit me many times in the past.
 
