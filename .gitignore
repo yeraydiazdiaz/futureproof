@@ -9,3 +9,4 @@ dist/
 .coverage
 .tox
 coverage.xml
+.dev
