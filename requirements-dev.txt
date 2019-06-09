@@ -7,3 +7,4 @@ ipython
 pdbpp
 wheel
 twine
+tox
