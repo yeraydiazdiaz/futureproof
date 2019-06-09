@@ -8,6 +8,9 @@ jobs:
       vmImage: 'ubuntu-latest'
     strategy:
       matrix:
+        py35:
+          python.version: '3.5'
+          tox.env: py35
         py36:
           python.version: '3.6'
           tox.env: py36
