@@ -1,5 +1,9 @@
 # Futureproof - Bulletproof concurrent.futures
 
+[![Build Status](https://dev.azure.com/yeraydiazdiaz/futureproof/_apis/build/status/yeraydiazdiaz.futureproof?branchName=master)](https://dev.azure.com/yeraydiazdiaz/futureproof/_build/latest?definitionId=1&branchName=master)
+[![Supported Python Versions](https://img.shields.io/pypi/pyversions/futureproof.svg)](https://pypi.org/project/futureproof/)
+[![PyPI](https://img.shields.io/pypi/v/futureproof.svg)](https://pypi.org/project/futureproof/)
+
 [`concurrent.futures`](https://docs.python.org/3/library/concurrent.futures.html) is amazing, but it's got some sharp edges that have bit me many times in the past.
 
 Futureproof is a thin wrapper around it addressing some of these problems and adding some usability features.
@@ -17,4 +21,4 @@ Check out the [examples directory](https://github.com/yeraydiazdiaz/futureproof/
 
 The API is subject to change.
 
-Currently only tested as a wrapper for ThreadPoolExecutor and Python 3.7.
+Currently only tested as a wrapper for ThreadPoolExecutor.
