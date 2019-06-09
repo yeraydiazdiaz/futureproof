@@ -2,10 +2,11 @@ import concurrent.futures as futures
 import logging
 import queue
 import time
-import typing
+from typing import Any, Callable, List, Union, Generator, Iterable
 from enum import IntEnum
 from functools import partial
 from threading import Lock
+from itertools import chain
 
 import attr
 
@@ -20,18 +21,18 @@ class ErrorPolicyEnum(IntEnum):
     RAISE = 3
 
 
-@attr.s(auto_attribs=True)
+@attr.s
 class Task:
     """Tasks describe an execution with parameters.
 
     Upon submitted a future is added to it encapsulating the result.
     """
 
-    fn: typing.Callable
-    args: typing.Tuple = attr.ib(default=())
-    kwargs: typing.Dict = attr.ib(default={})
-    result: typing.Any = attr.ib(default=None)
-    complete: bool = attr.ib(default=False)
+    fn = attr.ib()  # type: Callable
+    args = attr.ib(default=())  # type: tuple
+    kwargs = attr.ib(default={})  # type: dict
+    result = attr.ib(default=None)  # type: Any
+    complete = attr.ib(default=False)  # type: bool
 
 
 class TaskManager:
@@ -45,16 +46,16 @@ class TaskManager:
         executor: executors.FutureProofExecutor,
         error_policy: ErrorPolicyEnum = ErrorPolicyEnum.RAISE,
     ):
-        self._queue: queue.Queue = queue.Queue(executor.max_workers)
+        self._queue = queue.Queue(executor.max_workers)  # type: queue.Queue
         self._error_policy = error_policy
         self._executor = executor
         self._executor.set_queue(self._queue)
         self._shutdown = False
-        self._tasks: typing.Union[typing.List, typing.Generator] = []
-        self._submitted_task_count: int = 0
-        self.completed_tasks: typing.List = []
-        self._completed_tasks_lock: Lock = Lock()
-        self._results_queue: queue.Queue = queue.Queue()
+        self._tasks = []  # type: Iterable
+        self._submitted_task_count = 0  # type: int
+        self.completed_tasks = []  # type: List
+        self._completed_tasks_lock = Lock()  # type: Lock
+        self._results_queue = queue.Queue()  # type: queue.Queue
 
     def __enter__(self):
         return self
@@ -68,19 +69,23 @@ class TaskManager:
         with self._completed_tasks_lock:
             return [task.result for task in self.completed_tasks if task.complete]
 
-    def submit(
-        self, fn: typing.Callable, *args: typing.Any, **kwargs: typing.Any
-    ) -> None:
+    def submit(self, fn: Callable, *args: Any, **kwargs: Any) -> None:
         """Submit a task for execution."""
         task = Task(fn, args, kwargs)
-        self._tasks.append(task)
+        self._tasks = chain(self._tasks, [task])
 
-    def map(self, fn: typing.Callable, iterable: typing.Iterable) -> None:
+    def map(self, fn: Callable, iterable: Iterable) -> None:
         """Submit a set of tasks from a callable and a iterable of arguments
 
         The iterable may be a iterable of primitives or an iterable of tuples.
         """
-        self._tasks = (Task(fn, i if isinstance(i, tuple) else (i,)) for i in iterable)
+
+        def gen():
+            for i in iterable:
+                args = i if isinstance(i, tuple) else (i,)
+                yield Task(fn, args)
+
+        self._tasks = chain(self._tasks, gen())
 
     def run(self):
         for task in self._tasks:
