@@ -1,7 +1,7 @@
 from .task_manager import TaskManager, ErrorPolicyEnum
 from .executors import FutureProofExecutor
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __title__ = "futureproof"
 __description__ = "Bulletproof concurrent.futures"
