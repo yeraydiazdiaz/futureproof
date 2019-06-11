@@ -2,7 +2,7 @@ import concurrent.futures as futures
 import logging
 import queue
 import time
-from typing import Any, Callable, List, Union, Generator, Iterable
+from typing import Any, Callable, List, Union, Generator, Iterable, Iterator
 from enum import IntEnum
 from functools import partial
 from threading import Lock
@@ -65,7 +65,7 @@ class TaskManager:
         self.join()
 
     @property
-    def results(self):
+    def results(self) -> List:
         with self._completed_tasks_lock:
             return [task.result for task in self.completed_tasks if task.complete]
 
@@ -87,7 +87,7 @@ class TaskManager:
 
         self._tasks = chain(self._tasks, gen())
 
-    def run(self):
+    def run(self) -> None:
         for task in self._tasks:
             if self._shutdown:
                 break
@@ -96,7 +96,7 @@ class TaskManager:
 
         self.join()
 
-    def as_completed(self):
+    def as_completed(self) -> Iterator[Task]:
         for task in self._tasks:
             if self._shutdown:
                 break
@@ -111,7 +111,7 @@ class TaskManager:
 
         self._executor.join()
 
-    def _submit_task(self, task):
+    def _submit_task(self, task: Task) -> None:
         fut = self._executor.submit(task.fn, *task.args, **task.kwargs)
         cb = partial(self._on_complete, task=task)
         fut.add_done_callback(cb)
@@ -131,12 +131,12 @@ class TaskManager:
         finally:
             self._results_queue.put(complete_task)
 
-    def join(self):
+    def join(self) -> None:
         while len(self.completed_tasks) < self._submitted_task_count:
             self.wait_for_result()
         self._executor.join()
 
-    def wait_for_result(self):
+    def wait_for_result(self) -> Task:
         """Gather result from a submitted tasks."""
         completed_task = self._results_queue.get(block=True)
         self.completed_tasks.append(completed_task)
@@ -152,7 +152,7 @@ class TaskManager:
 
         return completed_task
 
-    def _raise(self, exception):
+    def _raise(self, exception) -> None:
         """Performs cleanup before raising an exception."""
         logger.info("Raising exception and shutting down")
         self._shutdown = True
