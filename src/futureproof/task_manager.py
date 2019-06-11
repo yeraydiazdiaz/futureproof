@@ -106,7 +106,10 @@ class TaskManager:
 
             self._submit_task(task)
 
-        self.join()
+        while len(self.completed_tasks) < self._submitted_task_count:
+            yield self.wait_for_result()
+
+        self._executor.join()
 
     def _submit_task(self, task):
         fut = self._executor.submit(task.fn, *task.args, **task.kwargs)
@@ -136,8 +139,7 @@ class TaskManager:
     def wait_for_result(self):
         """Gather result from a submitted tasks."""
         completed_task = self._results_queue.get(block=True)
-        logger.debug("Completed task received: %s", completed_task)
-
+        self.completed_tasks.append(completed_task)
         if isinstance(completed_task.result, Exception):
             if self._error_policy == ErrorPolicyEnum.RAISE:
                 self._raise(completed_task.result)
@@ -148,7 +150,6 @@ class TaskManager:
                     exc_info=completed_task.result,
                 )
 
-        self.completed_tasks.append(completed_task)
         return completed_task
 
     def _raise(self, exception):
