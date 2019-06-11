@@ -20,6 +20,9 @@ jobs:
         black:
           python.version: '3.7'
           tox.env: black
+        mypy:
+          python.version: '3.7'
+          tox.env: mypy
 
     steps:
       - task: UsePythonVersion@0
