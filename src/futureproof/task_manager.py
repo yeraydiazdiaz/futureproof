@@ -92,17 +92,29 @@ class TaskManager:
             if self._shutdown:
                 break
 
-            if self._queue.full():
-                self.wait_for_result()
-
-            fut = self._executor.submit(task.fn, *task.args, **task.kwargs)
-            cb = partial(self.on_complete, task=task)
-            fut.add_done_callback(cb)
-            self._submitted_task_count += 1
+            self._submit_task(task)
 
         self.join()
 
-    def on_complete(self, future, task):
+    def as_completed(self):
+        for task in self._tasks:
+            if self._shutdown:
+                break
+
+            if self._queue.full():
+                yield self.wait_for_result()
+
+            self._submit_task(task)
+
+        self.join()
+
+    def _submit_task(self, task):
+        fut = self._executor.submit(task.fn, *task.args, **task.kwargs)
+        cb = partial(self._on_complete, task=task)
+        fut.add_done_callback(cb)
+        self._submitted_task_count += 1
+
+    def _on_complete(self, future, task):
         """Called once per future to perform an operation over the result.
 
         Note this function is called by the executing threads.
@@ -123,23 +135,21 @@ class TaskManager:
 
     def wait_for_result(self):
         """Gather result from a submitted tasks."""
-        try:
-            completed_task = self._results_queue.get(block=True)
-            logger.debug("Completed task received: %s", completed_task)
-            self.completed_tasks.append(completed_task)
-        except queue.Empty:
-            # This condition should not happen
-            logger.debug("Queue empty")
-        else:
-            if isinstance(completed_task.result, Exception):
-                if self._error_policy == ErrorPolicyEnum.RAISE:
-                    self._raise(completed_task.result)
-                elif self._error_policy == ErrorPolicyEnum.LOG:
-                    logger.exception(
-                        "Task %s raised an exception",
-                        completed_task,
-                        exc_info=completed_task.result,
-                    )
+        completed_task = self._results_queue.get(block=True)
+        logger.debug("Completed task received: %s", completed_task)
+
+        if isinstance(completed_task.result, Exception):
+            if self._error_policy == ErrorPolicyEnum.RAISE:
+                self._raise(completed_task.result)
+            elif self._error_policy == ErrorPolicyEnum.LOG:
+                logger.exception(
+                    "Task %s raised an exception",
+                    completed_task,
+                    exc_info=completed_task.result,
+                )
+
+        self.completed_tasks.append(completed_task)
+        return completed_task
 
     def _raise(self, exception):
         """Performs cleanup before raising an exception."""
