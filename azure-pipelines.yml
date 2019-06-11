@@ -21,7 +21,7 @@ jobs:
           python.version: '3.7'
           tox.env: black
         mypy:
-          python.version: '3.7'
+          python.version: '3.6'
           tox.env: mypy
 
     steps:
