@@ -161,3 +161,19 @@ def test_map_after_submit(executor):
     tm.run()
 
     assert list(range(1, 11)) == sorted(tm.results)
+
+
+@pytest.mark.timeout(3)
+def test_as_completed(executor):
+    fn = partial(custom_sum, b=1)
+    tm = futureproof.TaskManager(executor)
+
+    for i in range(5):
+        tm.submit(custom_sum, i, 1)
+
+    gen = tm.as_completed()
+    assert next(gen).complete
+    assert len(tm.completed_tasks) == 1
+
+    assert len(list(gen)) == 4
+    assert list(range(1, 6)) == sorted(tm.results)
