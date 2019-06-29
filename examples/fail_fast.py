@@ -1,3 +1,9 @@
+"""
+An example of how futureproof fails quickly on exceptions versus
+concurrent.futures which blocks the interpreter with no traceback
+until all tasks are completed.
+"""
+
 import concurrent.futures
 import sys
 import logging
@@ -32,20 +38,29 @@ def with_futureproof():
     ) as tm:
         for i in range(50):
             tm.submit(flaky_sum, i, 1)
-    # an exception is raised
+    # an exception is raised as expected
 
 
 def with_futures():
     logger.info("Starting test")
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
         fs = [ex.submit(flaky_sum, i, 1) for i in range(50)]
-
-    logger.info(
-        "Got all results but no exception has been raised, "
-        "we need to gather results for it to be raised, "
-        "gathering now..."
-    )
-    results = [f.result() for f in fs]
+        for future in concurrent.futures.as_completed(fs):
+            try:
+                print(future.result())
+            except ValueError:
+                logger.info(
+                    "Raised and exception which will stop the main thread, "
+                    "however, since all 50 tasks were placed in the queue "
+                    "the interpreter will now stop until all remaining tasks are "
+                    "completed before exiting completly due to the exception."
+                )
+                logger.info(
+                    "You can force quit with Ctrl+C but depending on the tasks "
+                    "the interpreter might be blocked forcing you to sigkill "
+                    "the process."
+                )
+                raise
 
 
 if len(sys.argv) > 1 and sys.argv[1] == "futures":
