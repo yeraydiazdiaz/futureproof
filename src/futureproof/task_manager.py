@@ -88,15 +88,12 @@ class TaskManager:
         self._tasks = chain(self._tasks, gen())
 
     def run(self) -> None:
-        for task in self._tasks:
-            if self._shutdown:
-                break
-
-            self._submit_task(task)
-
-        self.join()
+        """Start the manager and wait until all tasks are completed before shutting down."""
+        for _ in self.as_completed():
+            pass
 
     def as_completed(self) -> Iterator[Task]:
+        """Start the manager and return an interator of completed tasks."""
         for task in self._tasks:
             if self._shutdown:
                 break
@@ -112,6 +109,8 @@ class TaskManager:
         self._executor.join()
 
     def _submit_task(self, task: Task) -> None:
+        """Submits a task to the executor, note this will block if the queue is full."""
+        logger.debug("Submitting task %r", task)
         fut = self._executor.submit(task.fn, *task.args, **task.kwargs)
         cb = partial(self._on_complete, task=task)
         fut.add_done_callback(cb)
@@ -129,6 +128,7 @@ class TaskManager:
         except Exception as exc:
             complete_task.result = exc
         finally:
+            logger.debug("Completed task %r", complete_task)
             self._results_queue.put(complete_task)
 
     def join(self) -> None:
@@ -139,6 +139,7 @@ class TaskManager:
     def wait_for_result(self) -> Task:
         """Gather result from a submitted tasks."""
         completed_task = self._results_queue.get(block=True)
+        logger.debug("Gathering result for completed task %r", completed_task)
         self.completed_tasks.append(completed_task)
         if isinstance(completed_task.result, Exception):
             if self._error_policy == ErrorPolicyEnum.RAISE:

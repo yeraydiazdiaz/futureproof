@@ -25,7 +25,9 @@ def custom_sum(a, b):
     return a + b
 
 
-def flaky_sum(a, b):
+def flaky_sum(a, b, delay=0):
+    if delay:
+        time.sleep(delay)
     if a % 5 == 0:
         raise ValueError
     return a + b
@@ -90,7 +92,7 @@ def test_submit_flaky_functions(executor):
     tm = futureproof.TaskManager(executor)
 
     for i in range(1, 101):
-        tm.submit(flaky_sum, i, 1)
+        tm.submit(flaky_sum, i, 1, delay=0.1)
 
     with pytest.raises(ValueError):
         tm.run()
