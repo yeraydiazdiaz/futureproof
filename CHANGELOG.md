@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 (unreleased)
+
+- Fix `run` method not failing fast
+
 ## 0.1.1
 
 - Added support for Python 3.5
