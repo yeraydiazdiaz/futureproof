@@ -1,3 +1,9 @@
+"""
+An example of how futureproof handles backpressure of tasks
+versus concurrent.futures which can hog resources and even cause the
+system to be unresponsive in extreme cases.
+"""
+
 import concurrent.futures
 import sys
 import logging
@@ -23,7 +29,11 @@ def custom_sum(a, b):
 
 
 def with_futureproof():
-    logger.info("Starting backpressure test")
+    logger.info("Starting backpressure test with 1,000,000 tasks")
+    logger.info(
+        "You may KeyboardInterrupt at any point "
+        "and the executor will stop almost immediately"
+    )
     ex = futureproof.FutureProofExecutor(max_workers=2)
     with futureproof.TaskManager(
         ex, error_policy=futureproof.ErrorPolicyEnum.RAISE
@@ -35,16 +45,16 @@ def with_futureproof():
 
 
 def with_futures():
-    logger.info("Starting backpressure test")
     response = input(
-        "This example will take a fair bit of memory and might "
-        "block and not respond to KeyboardInterrupts, a SIGINT will "
+        "Leaving this example running too will take a fair bit of memory and "
+        "might block and not respond to KeyboardInterrupts, a SIGINT will "
         "be required to stop it, are you sure you want to continue? [Y/n] "
     )
     if response == "n":
         print("Aborting as requested")
         return
 
+    logger.info("Starting backpressure test with 1,000,000 tasks")
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
         fn = partial(custom_sum, b=1)
         ex.map(fn, range(1_000_000_000))

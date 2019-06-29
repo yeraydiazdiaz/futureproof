@@ -1,12 +1,10 @@
 """
-An example of using as_completed in futureproof and concurrent.futures
+An example of using error policies in futureproof, the user can define
+a policy when creating the TaskManager configuring it to simply return them
+as the result of the task.
 
-concurrent.futures will return the exception raised but the exit handler will
-then block until all submitted tasks which delays the exit.
-
-futureproof requires the user to define that she will handle the exceptions
-and since it has only queued the minimum amount of tasks will exit much quicker.
-
+In contrast concurrent.futures will not raise the exception until we call
+`result` on the future.
 """
 
 import concurrent.futures
@@ -38,6 +36,7 @@ def flaky_sum(a, b):
 def with_futureproof():
     logger.info("Starting as_completed test")
     ex = futureproof.FutureProofExecutor(max_workers=2)
+    results = []
     # the user must explictly state she wants to catch the exceptions manually
     with futureproof.TaskManager(
         ex, error_policy=futureproof.ErrorPolicyEnum.IGNORE
@@ -46,28 +45,27 @@ def with_futureproof():
             tm.submit(flaky_sum, i, 1)
 
         for task in tm.as_completed():
-            logger.info("Got result from %s", task)
             if isinstance(task.result, Exception):
-                # raising the exception will signal futureproof to cleanup
-                # and not wait for any pending tasks exiting much quicker
-                raise task.result
+                logger.exception("Exception raised in result", exc_info=task.result)
+            else:
+                results.append(task.result)
+
+    print(results)
 
 
 def with_futures():
     logger.info("Starting as_completed test")
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
-        fs = [ex.submit(flaky_sum, i, 1) for i in range(50)]
+        fs = [ex.submit(flaky_sum, i, 1) for i in range(10)]
         results = []
-        try:
-            for f in concurrent.futures.as_completed(fs):
-                logger.info("Checking result...")
+        for f in concurrent.futures.as_completed(fs):
+            logger.info("Checking result...")
+            try:
                 results.append(f.result())
-        except Exception as exc:
-            logger.info("Exception raised in result")
-            # even though we're re-raising the exception
-            # concurrent.futures registers and exit handler which will block
-            # until all the scheduled futures are resolved delaying the exit
-            raise
+            except Exception as exc:
+                logger.exception("Exception raised in result")
+
+    print(results)
 
 
 if len(sys.argv) > 1 and sys.argv[1] == "futures":

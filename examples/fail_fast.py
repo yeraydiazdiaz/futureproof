@@ -34,7 +34,7 @@ def with_futureproof():
     logger.info("Starting test")
     ex = futureproof.FutureProofExecutor(max_workers=2)
     with futureproof.TaskManager(
-        ex, error_policy=futureproof.ErrorPolicyEnum.RAISE
+        ex, error_policy=futureproof.ErrorPolicyEnum.RAISE  # RAISE is the default
     ) as tm:
         for i in range(50):
             tm.submit(flaky_sum, i, 1)
