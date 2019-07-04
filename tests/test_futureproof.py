@@ -7,6 +7,8 @@ import pytest
 
 import futureproof
 
+import conftest
+
 
 def _setup_logging():
     """Convenience function to use in combination with -s flag for debugging."""
@@ -33,7 +35,9 @@ def flaky_sum(a, b, delay=0):
     return a + b
 
 
-def test_raise_immediate_exceptions(executor):
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
+def test_raise_immediate_exceptions(executor_type):
+    executor = conftest.get_executor_for_type(executor_type)
     tm = futureproof.TaskManager(executor)
 
     tm.submit(custom_sum, 1)
@@ -45,7 +49,9 @@ def test_raise_immediate_exceptions(executor):
     )
 
 
-def test_log_immediate_exceptions(executor, mocker):
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
+def test_log_immediate_exceptions(executor_type, mocker):
+    executor = conftest.get_executor_for_type(executor_type)
     mock_logger = mocker.patch("futureproof.task_manager.logger")
     tm = futureproof.TaskManager(executor, error_policy=futureproof.ErrorPolicyEnum.LOG)
 
@@ -55,7 +61,9 @@ def test_log_immediate_exceptions(executor, mocker):
     assert mock_logger.exception.call_count == 1
 
 
-def test_context_manager_raise_immediate_exceptions(executor):
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
+def test_context_manager_raise_immediate_exceptions(executor_type):
+    executor = conftest.get_executor_for_type(executor_type)
     with pytest.raises(TypeError) as exc_info:
         with futureproof.TaskManager(executor) as tm:
             tm.submit(custom_sum, 1)
@@ -65,7 +73,9 @@ def test_context_manager_raise_immediate_exceptions(executor):
     )
 
 
-def test_context_manager_log_immediate_exceptions(executor, mocker):
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
+def test_context_manager_log_immediate_exceptions(executor_type, mocker):
+    executor = conftest.get_executor_for_type(executor_type)
     mock_logger = mocker.patch("futureproof.task_manager.logger")
 
     with futureproof.TaskManager(
@@ -77,8 +87,10 @@ def test_context_manager_log_immediate_exceptions(executor, mocker):
 
 
 @pytest.mark.timeout(60)
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
 @pytest.mark.slow
-def test_submit_valid_functions(executor):
+def test_submit_valid_functions(executor_type):
+    executor = conftest.get_executor_for_type(executor_type)
     tm = futureproof.TaskManager(executor)
 
     for i in range(100):
@@ -88,7 +100,9 @@ def test_submit_valid_functions(executor):
     assert list(range(1, 101)) == sorted(tm.results)
 
 
-def test_submit_flaky_functions(executor):
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
+def test_submit_flaky_functions(executor_type):
+    executor = conftest.get_executor_for_type(executor_type)
     tm = futureproof.TaskManager(executor)
 
     for i in range(1, 101):
@@ -104,7 +118,9 @@ def test_submit_flaky_functions(executor):
     assert isinstance(failed_task.result, ValueError)
 
 
-def test_submit_flaky_functions_context_manager(executor):
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
+def test_submit_flaky_functions_context_manager(executor_type):
+    executor = conftest.get_executor_for_type(executor_type)
     with pytest.raises(ValueError):
         with futureproof.TaskManager(executor) as tm:
             for i in range(1, 101):
@@ -118,8 +134,10 @@ def test_submit_flaky_functions_context_manager(executor):
 
 
 @pytest.mark.timeout(60)
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
 @pytest.mark.slow
-def test_map_generator(executor):
+def test_map_generator(executor_type):
+    executor = conftest.get_executor_for_type(executor_type)
     fn = partial(custom_sum, b=1)
     with futureproof.TaskManager(executor) as tm:
         tm.map(fn, range(100))
@@ -128,8 +146,11 @@ def test_map_generator(executor):
 
 
 @pytest.mark.timeout(60)
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
 @pytest.mark.slow
-def test_map_lazy_generator(executor):
+def test_map_lazy_generator(executor_type):
+    executor = conftest.get_executor_for_type(executor_type)
+
     def gen():
         for i in range(100):
             time.sleep(0.1)
@@ -143,8 +164,10 @@ def test_map_lazy_generator(executor):
     assert list(range(1, 101)) == sorted(tm.results)
 
 
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
 @pytest.mark.timeout(3)
-def test_submit_after_map(executor):
+def test_submit_after_map(executor_type):
+    executor = conftest.get_executor_for_type(executor_type)
     fn = partial(custom_sum, b=1)
     tm = futureproof.TaskManager(executor)
     tm.map(fn, range(9))
@@ -154,8 +177,10 @@ def test_submit_after_map(executor):
     assert list(range(1, 11)) == sorted(tm.results)
 
 
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
 @pytest.mark.timeout(3)
-def test_map_after_submit(executor):
+def test_map_after_submit(executor_type):
+    executor = conftest.get_executor_for_type(executor_type)
     fn = partial(custom_sum, b=1)
     tm = futureproof.TaskManager(executor)
     tm.submit(fn, 0)
@@ -165,8 +190,10 @@ def test_map_after_submit(executor):
     assert list(range(1, 11)) == sorted(tm.results)
 
 
+@pytest.mark.parametrize("executor_type", ("thread", "process"))
 @pytest.mark.timeout(3)
-def test_as_completed(executor):
+def test_as_completed(executor_type):
+    executor = conftest.get_executor_for_type(executor_type)
     fn = partial(custom_sum, b=1)
     tm = futureproof.TaskManager(executor)
 

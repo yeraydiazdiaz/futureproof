@@ -85,7 +85,16 @@ class ThreadPoolExecutor(_FutureProofExecutor):
     def __init__(self, *args, **kwargs):
         super().__init__(futures.ThreadPoolExecutor, *args, **kwargs)
 
+    def join(self):
+        logger.debug("Shutting down executor")
+        self._executor.shutdown()  # adds None to the work queue
+        # not getting the above None prevents the thread from terminating
+        assert self._executor._work_queue.get() is None
+
 
 class ProcessPoolExecutor(_FutureProofExecutor):
     def __init__(self, *args, **kwargs):
         super().__init__(futures.ProcessPoolExecutor, *args, **kwargs)
+
+    def join(self):
+        logger.debug("Shutting down executor")
