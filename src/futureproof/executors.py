@@ -7,9 +7,13 @@ logger = logging.getLogger(__name__)
 
 
 class _FutureProofExecutor:
-    """A wrapper around the base concurrent.futures Executor class."""
+    """A wrapper around a subclass of concurrent.futures.Executor.
 
-    TIMEOUT = 2
+    Requires the subclass to be passed as the first parameter to the constructor.
+    Do not use this class directly, use either ThreadPoolExecutor or ProcessPoolExecutor.
+    """
+
+    TIMEOUT = 2  # TODO: allow parametrizing and disabling the monitor
 
     def __init__(self, executor_cls, *args, **kwargs):  # TODO: use only 3.7 [kw]args?
         self._executor = executor_cls(*args, **kwargs)  # type: futures.Executor
@@ -31,10 +35,7 @@ class _FutureProofExecutor:
         return self._executor._max_workers
 
     def join(self):
-        logger.debug("Shutting down executor")
-        self._executor.shutdown()  # adds None to the work queue
-        # not getting the above None prevents the thread from terminating
-        assert self._executor._work_queue.get() is None
+        raise NotImplementedError
 
     def initialize_worker(self):
         """Called on a newly spawned worker to perform initialization"""
