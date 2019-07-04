@@ -4,4 +4,4 @@ tests:
 	pytest -m 'not slow' && pytest -m slow
 
 tests-coverage:
-	coverage run pytest && coverage report
+	coverage run -m pytest && coverage report
