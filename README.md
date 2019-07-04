@@ -58,8 +58,8 @@ Just to reiterate, this is amazing, the fact that the barrier of entry for multi
 
 However, I see two problems with this:
 
-1. The boilerplate. I need to enter a context manager, call `submit` manually keeping track of the futures and its arguments, call `as_completed` which actually returns an iterator, call `result` on the future remembering to handle the exception.
-2. It's surprising. Why do you need to get the result in order to raise? What if I don't expect it to raise? I probably want to know as soon as possible.
+1. The boilerplate. We need to enter a context manager, call `submit` manually keeping track of the futures and its arguments, call `as_completed` which actually returns an iterator, call `result` on the future remembering to handle the exception.
+2. It's surprising. Why do we need to get the result in order to raise? What if we don't expect it to raise? We probably want to know as soon as possible.
 
 If you run this code you get the following output (at the time of this writing):
 
@@ -71,9 +71,7 @@ If you run this code you get the following output (at the time of this writing):
 'http://europe.wsj.com/' page is 970346 bytes
 ```
 
-Which is perfect, there was one worker per URL and the DNS failure is printed right at the top as expected.
-
-How does futureproof compare?
+Which is perfect. How does futureproof compare?
 
 ```python
 executor = futureproof.FutureProofExecutor(max_workers=5)
@@ -95,7 +93,9 @@ Traceback (most recent call last):
 socket.gaierror: [Errno 8] nodename nor servname provided, or not known
 ```
 
-Notice that `futureproof` raised the exception that ocurred immediately and everything stopped, as you would've expected. But `futureproof` gives you the option to log or ignore exceptions using error policies. Say we want to log the exceptions:
+Notice that `futureproof` raised the exception that ocurred immediately and everything stopped, as you would've expected in normal non-threaded Python, no surprises.
+
+If we prefer `futureproof` gives you the option to log or even ignore exceptions using error policies. Say we want to log the exceptions:
 
 ```python
 logging.basicConfig(
@@ -135,7 +135,7 @@ urllib.error.URLError: <urlopen error [Errno 8] nodename nor servname provided, 
 'http://europe.wsj.com/' page is 970880 bytes
 ```
 
-Note we only had to configure logging and pass the appropriate error policy, everything else was taken care for us. You can also choose to ignore exceptions completely and manage them yourself accessing `result`, which is how `concurrent.futures` expects you to do.
+Note we only had to configure logging and pass the appropriate error policy, everything else was taken care for us. You can also choose to ignore exceptions completely and manage them yourself accessing `result`, which is the workflow when using `concurrent.futures`.
 
 ### `as_completed`?
 
@@ -190,13 +190,13 @@ for task in tm.completed_tasks:
 
 `futureproof` defaults to logging monitoring information on the tasks so you always know if things are working. Note how the task manager exposes `completed_tasks` allowing easy access to the results without having to manually keep track of futures. Finally, as mentioned previously, you're also in total control over exception handling so you don't need to add code for that either.
 
-But that's not all, check out the [examples directory](https://github.com/yeraydiazdiaz/futureproof/tree/master/examples/) for a hands-on comparison between `futureproof` and `concurrent.futures` in other more serious scenarios.
+These are fairly minor problems that we can work around manually using `concurrent.futures` but when starting to deal higher number of tasks other problems arise, check out the [examples directory](https://github.com/yeraydiazdiaz/futureproof/tree/master/examples/) for a hands-on comparison between `futureproof` and `concurrent.futures` in other more serious scenarios.
 
 ## Alternatives
 
-I am by no means the first person to realise and tackle this problems, here a few similar, more stable and feature full, albeit restrictively licensed alternatives:
+I am by no means the first person to address these problems. Here a few similar, more stable and feature full, albeit restrictively licensed alternatives:
 
 - [Pebble](https://pebble.readthedocs.io/en/latest/), LGPL 3.0
 - [more-executors](https://github.com/rohanpm/more-executors), GPL 3.0
 
-`futureproof` is MIT licensed.
+`futureproof` is licensed MIT.
