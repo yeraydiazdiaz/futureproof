@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+
+- Support process executors
+
 ## 0.1.2
 
 - Fix `run` method not failing fast

@@ -111,7 +111,9 @@ def test_submit_flaky_functions(executor_type):
     with pytest.raises(ValueError):
         tm.run()
 
-    assert len(tm.results) == 5
+    # processes tend to take longer to shutdown, threads are faster
+    min_results, max_results = (5, 6) if executor_type == "threads" else (5, 10)
+    assert min_results <= len(tm.results) < max_results
     failed_task = next(
         task for task in tm.completed_tasks if isinstance(task.result, Exception)
     )
@@ -126,7 +128,9 @@ def test_submit_flaky_functions_context_manager(executor_type):
             for i in range(1, 101):
                 tm.submit(flaky_sum, i, 1)
 
-    assert len(tm.results) == 5
+    # processes tend to take longer to shutdown, threads are faster
+    min_results, max_results = (5, 6) if executor_type == "threads" else (5, 10)
+    assert min_results <= len(tm.results) < max_results
     failed_task = next(
         task for task in tm.completed_tasks if isinstance(task.result, Exception)
     )
