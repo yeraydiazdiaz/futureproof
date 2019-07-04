@@ -210,3 +210,10 @@ def test_as_completed(executor_type):
 
     assert len(list(gen)) == 4
     assert list(range(1, 6)) == sorted(tm.results)
+
+
+def test_task_manager_error_policy_as_string():
+    executor = conftest.get_executor_for_type("thread")
+    tm = futureproof.TaskManager(executor, "log")
+
+    assert tm._error_policy == futureproof.ErrorPolicyEnum.LOG
