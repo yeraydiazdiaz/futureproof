@@ -1,5 +1,5 @@
 from .task_manager import TaskManager, ErrorPolicyEnum
-from .executors import FutureProofExecutor
+from .executors import ThreadPoolExecutor, ProcessPoolExecutor
 
 __version__ = "0.1.2"
 
@@ -16,4 +16,9 @@ __license__ = "MIT"
 __copyright__ = "Copyright (c) 2019 Yeray Díaz Díaz"
 
 
-__all__ = ["TaskManager", "ErrorPolicyEnum", "FutureProofExecutor"]
+__all__ = [
+    "TaskManager",
+    "ErrorPolicyEnum",
+    "ThreadPoolExecutor",
+    "ProcessPoolExecutor",
+]

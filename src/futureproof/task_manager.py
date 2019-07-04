@@ -43,7 +43,7 @@ class TaskManager:
 
     def __init__(
         self,
-        executor: executors.FutureProofExecutor,
+        executor: executors._FutureProofExecutor,
         error_policy: ErrorPolicyEnum = ErrorPolicyEnum.RAISE,
     ):
         self._queue = queue.Queue(executor.max_workers)  # type: queue.Queue

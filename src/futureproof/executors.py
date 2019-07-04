@@ -6,14 +6,13 @@ from threading import Lock
 logger = logging.getLogger(__name__)
 
 
-class FutureProofExecutor:
+class _FutureProofExecutor:
     """A wrapper around the base concurrent.futures Executor class."""
 
-    _EXECUTOR_CLASS = futures.ThreadPoolExecutor
     TIMEOUT = 2
 
-    def __init__(self, *args, **kwargs):  # TODO: use only 3.7 [kw]args?
-        self._executor = self._EXECUTOR_CLASS(*args, **kwargs)
+    def __init__(self, executor_cls, *args, **kwargs):  # TODO: use only 3.7 [kw]args?
+        self._executor = executor_cls(*args, **kwargs)  # type: futures.Executor
         self._current_futures = set()  # type: set
         self._current_futures_lock = Lock()  # type: Lock
         self._monitor_future = None  # type: futures.Future
@@ -80,3 +79,13 @@ class FutureProofExecutor:
                             self._current_futures.remove(f)
         except Exception:
             logger.exception("Error in monitor")
+
+
+class ThreadPoolExecutor(_FutureProofExecutor):
+    def __init__(self, *args, **kwargs):
+        super().__init__(futures.ThreadPoolExecutor, *args, **kwargs)
+
+
+class ProcessPoolExecutor(_FutureProofExecutor):
+    def __init__(self, *args, **kwargs):
+        super().__init__(futures.ProcessPoolExecutor, *args, **kwargs)
