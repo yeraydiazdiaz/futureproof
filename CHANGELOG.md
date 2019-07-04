@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0
+## 0.2.0 (unreleased)
 
 - Support process executors
 - Allow for error policies to be specified as strings
