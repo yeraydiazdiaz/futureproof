@@ -169,7 +169,7 @@ def test_map_lazy_generator(executor_type):
 
 
 @pytest.mark.parametrize("executor_type", ("thread", "process"))
-@pytest.mark.timeout(3)
+@pytest.mark.timeout(4)
 def test_submit_after_map(executor_type):
     executor = conftest.get_executor_for_type(executor_type)
     fn = partial(custom_sum, b=1)
@@ -182,7 +182,7 @@ def test_submit_after_map(executor_type):
 
 
 @pytest.mark.parametrize("executor_type", ("thread", "process"))
-@pytest.mark.timeout(3)
+@pytest.mark.timeout(4)
 def test_map_after_submit(executor_type):
     executor = conftest.get_executor_for_type(executor_type)
     fn = partial(custom_sum, b=1)
