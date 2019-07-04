@@ -105,9 +105,7 @@ logging.basicConfig(
 )
 
 executor = futureproof.FutureProofExecutor(max_workers=5)
-with futureproof.TaskManager(
-    executor, error_policy=futureproof.ErrorPolicyEnum.LOG
-) as tm:
+with futureproof.TaskManager(executor, error_policy="log") as tm:
     for url in URLS:
         tm.submit(load_url, url, 60)
         for task in tm.as_completed():
@@ -164,9 +162,7 @@ Let's compare to the `futureproof` version:
 
 ```python
 executor = futureproof.FutureProofExecutor(max_workers=5)
-with futureproof.TaskManager(
-    executor, error_policy=futureproof.ErrorPolicyEnum.IGNORE
-) as tm:
+with futureproof.TaskManager(executor, error_policy="ignore") as tm:
     for url in URLS:
         tm.submit(load_url, url, 60)
 

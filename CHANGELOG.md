@@ -3,6 +3,7 @@
 ## 0.2.0
 
 - Support process executors
+- Allow for error policies to be specified as strings
 
 ## 0.1.2
 

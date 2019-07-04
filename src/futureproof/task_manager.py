@@ -3,7 +3,7 @@ import logging
 import queue
 import time
 from typing import Any, Callable, List, Union, Generator, Iterable, Iterator
-from enum import IntEnum
+from enum import Enum
 from functools import partial
 from threading import Lock
 from itertools import chain
@@ -15,10 +15,10 @@ from futureproof import executors
 logger = logging.getLogger(__name__)
 
 
-class ErrorPolicyEnum(IntEnum):
-    IGNORE = 1
-    LOG = 2
-    RAISE = 3
+class ErrorPolicyEnum(Enum):
+    IGNORE = "ignore"
+    LOG = "log"
+    RAISE = "raise"
 
 
 @attr.s
@@ -44,10 +44,14 @@ class TaskManager:
     def __init__(
         self,
         executor: executors._FutureProofExecutor,
-        error_policy: ErrorPolicyEnum = ErrorPolicyEnum.RAISE,
+        error_policy: Union[ErrorPolicyEnum, str] = ErrorPolicyEnum.RAISE,
     ):
         self._queue = queue.Queue(executor.max_workers)  # type: queue.Queue
-        self._error_policy = error_policy
+        self._error_policy = (
+            error_policy
+            if isinstance(error_policy, ErrorPolicyEnum)
+            else ErrorPolicyEnum(error_policy.lower())
+        )
         self._executor = executor
         self._executor.set_queue(self._queue)
         self._shutdown = False
