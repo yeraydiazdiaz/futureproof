@@ -54,7 +54,7 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             print('%r page is %d bytes' % (url, len(data)))
 ```
 
-Just to reiterate, this is amazing, the fact that the barrier of entry for threads is this small is really an achievement on the work done by Brian Quinlan and the core Python developers.
+Just to reiterate, this is amazing, the fact that the barrier of entry for multithreading is this small is really a testament to the great work done by Brian Quinlan and the core Python developers.
 
 However, I see two problems with this:
 
@@ -84,18 +84,18 @@ with futureproof.TaskManager(executor) as tm:
         print("%r page is %d bytes" % (task.args[0], len(task.result)))
 ```
 
-That looks quite similar, there's an executor *and* a task manager, `submit` and `as_completed` are methods on it and there's no try..except. If we run it we get:
+That looks quite similar, there's an executor and a *task manager*. `submit` and `as_completed` are methods on it and there's no `try..except`. If we run it we get:
 
 ```
 'http://www.foxnews.com/' page is 248838 bytes
 Traceback (most recent call last):
   File "/Users/yeray/.pyenv/versions/3.7.3/lib/python3.7/urllib/request.py", line 1317, in do_open
     encode_chunked=req.has_header('Transfer-encoding'))
-  ... more traceback output ...
+  ... omitted traceback output ...
 socket.gaierror: [Errno 8] nodename nor servname provided, or not known
 ```
 
-Notice that `futureproof` raised the exception that ocurred immediately and stopped, as you would've expected, but it gives you the option to log, or ignore exceptions using error policies. Say we want to log the exceptions:
+Notice that `futureproof` raised the exception that ocurred immediately and everything stopped, as you would've expected. But `futureproof` gives you the option to log or ignore exceptions using error policies. Say we want to log the exceptions:
 
 ```python
 logging.basicConfig(
@@ -135,7 +135,68 @@ urllib.error.URLError: <urlopen error [Errno 8] nodename nor servname provided, 
 'http://europe.wsj.com/' page is 970880 bytes
 ```
 
-Note we only had to configure logging, everything else was taken care for us. You can also choose to ignore exceptions completely and manage them yourself accessing `result`, which is how `concurrent.futures` expects you to do.
+Note we only had to configure logging and pass the appropriate error policy, everything else was taken care for us. You can also choose to ignore exceptions completely and manage them yourself accessing `result`, which is how `concurrent.futures` expects you to do.
 
+### `as_completed`?
 
-Check out the [examples directory](https://github.com/yeraydiazdiaz/futureproof/tree/master/examples/) for a hands-on comparison between `futureproof` and `concurrent.futures`.
+If you think about it, why do we need `as_completed`?
+
+The answer is for monitoring and error handling.
+
+If we had loads of URLs, you don't want to wait until all URLs are back to show output, it could take ages. But really it just adds complexity to the code. What does the example look like if you don't use `as_completed`?
+
+```python
+with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    future_to_url = {executor.submit(load_url, url, 60): url for url in URLS}
+
+for future, url in future_to_url.items():
+    try:
+        data = future.result()
+    except Exception as exc:
+        print("%r generated an exception: %s" % (url, exc))
+    else:
+        print("%r page is %d bytes" % (url, len(data)))
+```
+
+Which is arguably more readable, however, it has a subtle difference: there's no output until all the futures are complete. If you imagine tasks taking longer you're left wondering if things are even working at all.
+
+Let's compare to the `futureproof` version:
+
+```python
+executor = futureproof.FutureProofExecutor(max_workers=5)
+with futureproof.TaskManager(
+    executor, error_policy=futureproof.ErrorPolicyEnum.IGNORE
+) as tm:
+    for url in URLS:
+        tm.submit(load_url, url, 60)
+
+for task in tm.completed_tasks:
+    if isinstance(task.result, Exception):
+        print("%r generated an exception: %s" % (task.args[0], task.result))
+    else:
+        print("%r page is %d bytes" % (task.args[0], len(task.result)))
+```
+
+```
+[12:40:28 123145393414144] Starting executor monitor
+[12:40:29 123145393414144] 5 task completed in the last 1.01 second(s)
+[12:40:29 123145393414144] Shutting down monitor...
+'http://www.foxnews.com/' page is 252016 bytes
+'http://some-made-up-domain-that-definitely-does-not-exist.com/' generated an exception: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+'http://www.cnn.com/' page is 992648 bytes
+'http://www.bbc.co.uk/' page is 338987 bytes
+'http://europe.wsj.com/' page is 969285 bytes
+```
+
+`futureproof` defaults to logging monitoring information on the tasks so you always know if things are working. Note how the task manager exposes `completed_tasks` allowing easy access to the results without having to manually keep track of futures. Finally, as mentioned previously, you're also in total control over exception handling so you don't need to add code for that either.
+
+But that's not all, check out the [examples directory](https://github.com/yeraydiazdiaz/futureproof/tree/master/examples/) for a hands-on comparison between `futureproof` and `concurrent.futures` in other more serious scenarios.
+
+## Alternatives
+
+I am by no means the first person to realise and tackle this problems, here a few similar, more stable and feature full, albeit restrictively licensed alternatives:
+
+- [Pebble](https://pebble.readthedocs.io/en/latest/), LGPL 3.0
+- [more-executors](https://github.com/rohanpm/more-executors), GPL 3.0
+
+`futureproof` is MIT licensed.
