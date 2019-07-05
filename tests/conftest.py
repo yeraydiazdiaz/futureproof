@@ -1,3 +1,4 @@
+import os
 import sys
 
 import pytest
@@ -16,7 +17,9 @@ def get_process_executor():
     return futureproof.ProcessPoolExecutor(max_workers=2)
 
 
-def get_executor_for_type(executor_type):
+def get_executor_for_type():
+    executor_type = os.getenv("EXECUTOR_TYPE", "thread")
+
     if executor_type == "thread":
         return get_thread_executor()
     else:

@@ -2,7 +2,7 @@
 
 ## 0.2.0 (unreleased)
 
-- Support process executors
+- Support process executors (Python 3.7 only)
 - Allow for error policies to be specified as strings
 
 ## 0.1.2
