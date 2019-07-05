@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## 0.2.0
 
 - Support process executors (Python 3.7 only)
 - Allow for error policies to be specified as strings
