@@ -1,7 +1,7 @@
 .PHONY: tests tests-coverage
 
 tests:
-	pytest -m 'not slow' && pytest -m slow
+	pytest -x -m 'not slow' && pytest -x -m slow
 
 tests-coverage:
 	coverage run -m pytest && coverage report

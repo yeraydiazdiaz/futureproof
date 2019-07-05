@@ -105,11 +105,7 @@ def test_submit_flaky_functions():
     with pytest.raises(ValueError):
         tm.run()
 
-    # processes tend to take longer to shutdown, threads are faster
-    min_results, max_results = (
-        (5, 6) if isinstance(executor, futureproof.ThreadPoolExecutor) else (5, 10)
-    )
-    assert min_results <= len(tm.results) < max_results
+    assert len(tm.results) < 10
     failed_task = next(
         task for task in tm.completed_tasks if isinstance(task.result, Exception)
     )
@@ -123,11 +119,7 @@ def test_submit_flaky_functions_context_manager():
             for i in range(1, 101):
                 tm.submit(flaky_sum, i, 1)
 
-    # processes tend to take longer to shutdown, threads are faster
-    min_results, max_results = (
-        (5, 6) if isinstance(executor, futureproof.ThreadPoolExecutor) else (5, 10)
-    )
-    assert min_results <= len(tm.results) < max_results
+    assert len(tm.results) < 10
     failed_task = next(
         task for task in tm.completed_tasks if isinstance(task.result, Exception)
     )
@@ -190,7 +182,6 @@ def test_map_after_submit():
 @pytest.mark.timeout(3)
 def test_as_completed():
     executor = conftest.get_executor_for_type()
-    fn = partial(custom_sum, b=1)
     tm = futureproof.TaskManager(executor)
 
     for i in range(5):
