@@ -1,8 +1,6 @@
-import concurrent.futures as futures
 import logging
 import queue
-import time
-from typing import Any, Callable, List, Union, Generator, Iterable, Iterator
+from typing import Any, Callable, List, Union, Iterable, Iterator
 from enum import Enum
 from functools import partial
 from threading import Lock
@@ -46,7 +44,7 @@ class TaskManager:
         executor: executors._FutureProofExecutor,
         error_policy: Union[ErrorPolicyEnum, str] = ErrorPolicyEnum.RAISE,
     ):
-        self._queue = queue.Queue(executor.max_workers)  # type: queue.Queue
+        self._tasks_in_queue = 0
         self._error_policy = (
             error_policy
             if isinstance(error_policy, ErrorPolicyEnum)
@@ -101,7 +99,8 @@ class TaskManager:
             if self._shutdown:
                 break
 
-            if self._queue.full():
+            if self._tasks_in_queue == self._executor.max_workers:
+                logger.debug("Queue full, waiting for result")
                 yield self.wait_for_result()
 
             self._submit_task(task)
@@ -113,7 +112,10 @@ class TaskManager:
 
     def _submit_task(self, task: Task) -> None:
         """Submits a task to the executor, note this will block if the queue is full."""
-        logger.debug("Submitting task %r", task)
+        logger.debug(
+            "Tasks in queue: %d, submitting task %r", self._tasks_in_queue, task
+        )
+        self._tasks_in_queue += 1
         fut = self._executor.submit(task.fn, *task.args, **task.kwargs)
         cb = partial(self._on_complete, task=task)
         fut.add_done_callback(cb)
@@ -143,6 +145,7 @@ class TaskManager:
         """Gather result from a submitted tasks."""
         completed_task = self._results_queue.get(block=True)
         logger.debug("Gathering result for completed task %r", completed_task)
+        self._tasks_in_queue -= 1
         self.completed_tasks.append(completed_task)
         if isinstance(completed_task.result, Exception):
             if self._error_policy == ErrorPolicyEnum.RAISE:
