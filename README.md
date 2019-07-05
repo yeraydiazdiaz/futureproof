@@ -17,9 +17,11 @@ Futureproof is a thin wrapper around it addressing some of these problems and ad
 
 ## Current status: Alpha
 
-The API is subject to change.
+The API is subject to change, any changes will be documented in the changelog.
 
-Currently only tested as a wrapper for ThreadPoolExecutor.
+Futureproof was designed to wrap ThreadPoolExecutor, however version 0.2+ includes limited support ProcessPoolExecutor but only for Python3.7+.
+
+When using ProcessPoolExecutor a "OSError: handle is closed" error is known to be printed from the interpreter exit handler, seemingly caused by worker processed being shut down prematurely. This is not affect the execution of the tasks.
 
 ## concurrent.futures has problems? What problems?
 
