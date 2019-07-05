@@ -7,10 +7,8 @@ system to be unresponsive in extreme cases.
 import concurrent.futures
 import sys
 import logging
-import threading
 import time
 from functools import partial
-from random import random
 
 import futureproof
 
@@ -20,7 +18,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-logger = logging.getLogger("futureproof")
+logger = logging.getLogger(__name__)
 
 
 def custom_sum(a, b):
@@ -34,7 +32,7 @@ def with_futureproof():
         "You may KeyboardInterrupt at any point "
         "and the executor will stop almost immediately"
     )
-    ex = futureproof.FutureProofExecutor(max_workers=2)
+    ex = futureproof.ThreadPoolExecutor(max_workers=2)
     with futureproof.TaskManager(
         ex, error_policy=futureproof.ErrorPolicyEnum.RAISE
     ) as tm:

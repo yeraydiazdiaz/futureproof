@@ -10,9 +10,7 @@ In contrast concurrent.futures will not raise the exception until we call
 import concurrent.futures
 import sys
 import logging
-import threading
 import time
-from functools import partial
 from random import random
 
 import futureproof
@@ -23,7 +21,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-logger = logging.getLogger("futureproof")
+logger = logging.getLogger(__name__)
 
 
 def flaky_sum(a, b):
@@ -35,7 +33,7 @@ def flaky_sum(a, b):
 
 def with_futureproof():
     logger.info("Starting as_completed test")
-    ex = futureproof.FutureProofExecutor(max_workers=2)
+    ex = futureproof.ThreadPoolExecutor(max_workers=2)
     results = []
     # the user must explictly state she wants to catch the exceptions manually
     with futureproof.TaskManager(
@@ -62,7 +60,7 @@ def with_futures():
             logger.info("Checking result...")
             try:
                 results.append(f.result())
-            except Exception as exc:
+            except Exception:
                 logger.exception("Exception raised in result")
 
     print(results)

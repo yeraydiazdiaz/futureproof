@@ -19,7 +19,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-logger = logging.getLogger("futureproof")
+logger = logging.getLogger(__name__)
 
 
 def delayed_sum(a, b):

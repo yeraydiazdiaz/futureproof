@@ -26,6 +26,7 @@ URLS = [
     "http://some-made-up-domain-that-definitely-does-not-exist.com/",
 ]
 
+
 # Retrieve a single page and report the URL and contents
 def load_url(url, timeout):
     with urllib.request.urlopen(url, timeout=timeout) as conn:
@@ -49,7 +50,7 @@ def with_futures():
 
 
 def with_futureproof():
-    executor = futureproof.FutureProofExecutor(max_workers=5)
+    executor = futureproof.ThreadPoolExecutor(max_workers=5)
     with futureproof.TaskManager(
         executor, error_policy=futureproof.ErrorPolicyEnum.IGNORE
     ) as tm:

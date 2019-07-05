@@ -16,7 +16,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-logger = logging.getLogger("futureproof")
+logger = logging.getLogger(__name__)
 
 URLS = [
     "http://www.foxnews.com/",
@@ -25,6 +25,7 @@ URLS = [
     "http://www.bbc.co.uk/",
     "http://some-made-up-domain-that-definitely-does-not-exist.com/",
 ]
+
 
 # Retrieve a single page and report the URL and contents
 def load_url(url, timeout):
@@ -48,7 +49,7 @@ def with_futures():
 
 
 def with_futureproof():
-    executor = futureproof.FutureProofExecutor(max_workers=5)
+    executor = futureproof.ThreadPoolExecutor(max_workers=5)
     with futureproof.TaskManager(executor) as tm:
         for url in URLS:
             tm.submit(load_url, url, 60)
