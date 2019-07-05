@@ -27,15 +27,13 @@ class _FutureProofExecutor:
     def __exit__(self, exc_type, exc_val, exc_tb):
         return self._executor.__exit__(exc_type, exc_val, exc_tb)
 
-    def set_queue(self, queue):
-        self._executor._work_queue = queue
-
     @property
     def max_workers(self):
         return self._executor._max_workers
 
     def join(self):
-        raise NotImplementedError
+        logger.debug("Shutting down executor")
+        self._executor.shutdown()
 
     def initialize_worker(self):
         """Called on a newly spawned worker to perform initialization"""
@@ -86,16 +84,7 @@ class ThreadPoolExecutor(_FutureProofExecutor):
     def __init__(self, *args, **kwargs):
         super().__init__(futures.ThreadPoolExecutor, *args, **kwargs)
 
-    def join(self):
-        logger.debug("Shutting down executor")
-        self._executor.shutdown()  # adds None to the work queue
-        # not getting the above None prevents the thread from terminating
-        assert self._executor._work_queue.get() is None
-
 
 class ProcessPoolExecutor(_FutureProofExecutor):
     def __init__(self, *args, **kwargs):
         super().__init__(futures.ProcessPoolExecutor, *args, **kwargs)
-
-    def join(self):
-        logger.debug("Shutting down executor")

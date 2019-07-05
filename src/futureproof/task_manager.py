@@ -53,7 +53,6 @@ class TaskManager:
             else ErrorPolicyEnum(error_policy.lower())
         )
         self._executor = executor
-        self._executor.set_queue(self._queue)
         self._shutdown = False
         self._tasks = []  # type: Iterable
         self._submitted_task_count = 0  # type: int
