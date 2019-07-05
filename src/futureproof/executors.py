@@ -1,5 +1,6 @@
 import concurrent.futures as futures
 import logging
+import sys
 import time
 from threading import Lock
 
@@ -87,4 +88,8 @@ class ThreadPoolExecutor(_FutureProofExecutor):
 
 class ProcessPoolExecutor(_FutureProofExecutor):
     def __init__(self, *args, **kwargs):
+        if sys.version_info < (3, 7):
+            raise NotImplementedError(
+                "ProcessPoolExecutor are only available for Python 3.7+"
+            )
         super().__init__(futures.ProcessPoolExecutor, *args, **kwargs)
