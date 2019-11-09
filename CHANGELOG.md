@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- Add support for Python 3.8
+
 ## 0.2.0
 
 - Support process executors (Python 3.7 only)
