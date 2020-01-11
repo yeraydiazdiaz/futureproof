@@ -93,3 +93,8 @@ class ProcessPoolExecutor(_FutureProofExecutor):
                 "ProcessPoolExecutor are only available for Python 3.7+"
             )
         super().__init__(futures.ProcessPoolExecutor, *args, **kwargs)
+
+    def join(self):
+        logger.debug("Shutting down executor")
+        # Do not shutdown the executor manually as it logs an error
+        # in the concurrent.futures.process registered exit handler
