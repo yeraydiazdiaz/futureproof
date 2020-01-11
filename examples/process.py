@@ -2,7 +2,6 @@ import concurrent.futures
 import logging
 import sys
 import time
-from random import random
 
 import futureproof
 
