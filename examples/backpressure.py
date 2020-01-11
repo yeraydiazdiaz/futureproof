@@ -27,7 +27,7 @@ def custom_sum(a, b):
 
 
 def with_futureproof():
-    logger.info("Starting backpressure test with 1,000,000 tasks")
+    logger.info("Starting backpressure test with 1,000,000,000 tasks")
     logger.info(
         "You may KeyboardInterrupt at any point "
         "and the executor will stop almost immediately"
@@ -52,7 +52,7 @@ def with_futures():
         print("Aborting as requested")
         return
 
-    logger.info("Starting backpressure test with 1,000,000 tasks")
+    logger.info("Starting backpressure test with 1,000,000,000 tasks")
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
         fn = partial(custom_sum, b=1)
         ex.map(fn, range(1_000_000_000))
