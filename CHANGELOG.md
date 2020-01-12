@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+- Fix process executor not shutting down correctly.
+
 ## 0.2.1
 
 - Add support for Python 3.8.

@@ -1,7 +1,7 @@
 from .task_manager import TaskManager, ErrorPolicyEnum
 from .executors import ThreadPoolExecutor, ProcessPoolExecutor
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 __title__ = "futureproof"
 __description__ = "Bulletproof concurrent.futures"
@@ -13,7 +13,7 @@ __author__ = "Yeray Díaz Díaz"
 __email__ = "yeraydiazdiaz@gmail.com"
 
 __license__ = "MIT"
-__copyright__ = "Copyright (c) 2019 Yeray Díaz Díaz"
+__copyright__ = "Copyright (c) 2020 Yeray Díaz Díaz"
 
 
 __all__ = [
