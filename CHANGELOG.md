@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3
+
+- Add support for Python 3.9
+- Drop support for Python 3.5
+
 ## 0.2.2
 
 - Fix process executor not shutting down correctly.
