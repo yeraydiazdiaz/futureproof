@@ -8,9 +8,6 @@ jobs:
       vmImage: 'ubuntu-latest'
     strategy:
       matrix:
-        py35:
-          python.version: '3.5'
-          tox.env: py35
         py36:
           python.version: '3.6'
           tox.env: py36
@@ -20,11 +17,14 @@ jobs:
         py38:
           python.version: '3.8'
           tox.env: py38
+        py39:
+          python.version: '3.9'
+          tox.env: py39
         black:
           python.version: '3.7'
           tox.env: black
         mypy:
-          python.version: '3.6'
+          python.version: '3.7'
           tox.env: mypy
 
     steps:
