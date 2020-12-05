@@ -8,3 +8,6 @@ pdbpp
 wheel
 twine
 tox
+sphinx
+myst-parser
+furo
