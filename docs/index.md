@@ -29,5 +29,8 @@ Futureproof was designed to wrap ThreadPoolExecutor, however version 0.2+ includ
 ```{toctree}
 :hidden:
 motivation
+api
 alternatives
+changelog
+GitHub Repository <https://github.com/yeraydiazdiaz/futureproof>
 ```

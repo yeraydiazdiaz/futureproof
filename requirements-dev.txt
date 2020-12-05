@@ -9,5 +9,6 @@ wheel
 twine
 tox
 sphinx
+sphinx-autobuild
 myst-parser
 furo

@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class ErrorPolicyEnum(Enum):
+    """Error policy options."""
+
     IGNORE = "ignore"
     LOG = "log"
     RAISE = "raise"
@@ -21,9 +23,9 @@ class ErrorPolicyEnum(Enum):
 
 @attr.s(eq=False)
 class Task:
-    """Tasks describe an execution with parameters.
+    """Tasks describe an execution with parameters and encapsulate the result.
 
-    Upon submitted a future is added to it encapsulating the result.
+    When submitted a Future is added to it encapsulating the result.
     """
 
     fn = attr.ib()  # type: Callable
@@ -36,7 +38,16 @@ class Task:
 class TaskManager:
     """Manages how tasks are created and placed in the queue.
 
-    Executors get Tasks from this manager.
+    Executors pull Tasks from the managers.
+
+    :param executor: The executor that will execute the submitted tasks.
+    :param error_policy: Error policy indicating what should the behaviour be
+        if an exception is raised. Defaults to ``raise``, raising the exception
+        as soon as it happens and stopping all execution. ``log`` will only log
+        the exception but continue the execution of the remaining tasks.
+        ``ignore`` will not do anything, note, however, that the exception will
+        be set as the result of the task so users can re-raise them if they
+        so choose.
     """
 
     def __init__(
@@ -54,9 +65,10 @@ class TaskManager:
         self._shutdown = False
         self._tasks = []  # type: Iterable
         self._submitted_task_count = 0  # type: int
-        self.completed_tasks = []  # type: List
-        self._completed_tasks_lock = Lock()  # type: Lock
         self._results_queue = queue.Queue()  # type: queue.Queue
+        #: List of completed Task objects
+        self.completed_tasks = []  # type: List[Task]
+        self._completed_tasks_lock = Lock()  # type: Lock
 
     def __enter__(self):
         return self
@@ -67,11 +79,18 @@ class TaskManager:
 
     @property
     def results(self) -> List:
+        """List of results for completed tasks.
+
+        Note the contents may different as more tasks are completed.
+        """
         with self._completed_tasks_lock:
             return [task.result for task in self.completed_tasks if task.complete]
 
     def submit(self, fn: Callable, *args: Any, **kwargs: Any) -> Task:
-        """Submit a task for execution."""
+        """Submit a task for execution.
+
+        The newly created :class:`Task` will be returned.
+        """
         task = Task(fn, args, kwargs)
         self._tasks = chain(self._tasks, [task])
         return task
@@ -79,7 +98,7 @@ class TaskManager:
     def map(self, fn: Callable, iterable: Iterable) -> None:
         """Submit a set of tasks from a callable and a iterable of arguments
 
-        The iterable may be a iterable of primitives or an iterable of tuples.
+        `iterable` may be any iterable of primitives or an iterable of argument tuples.
         """
 
         def gen():
@@ -95,19 +114,24 @@ class TaskManager:
             pass
 
     def as_completed(self) -> Iterator[Task]:
-        """Start the manager and return an interator of completed tasks."""
+        """Start the manager and return an interator of completed tasks.
+
+        When using the task manager as a context manager as_completed must be used
+        *inside* the context, otherwise there will be no effect as the task manager
+        will wait until all tasks are completed.
+        """
         for task in self._tasks:
             if self._shutdown:
                 break
 
             if self._tasks_in_queue == self._executor.max_workers:
                 logger.debug("Queue full, waiting for result")
-                yield self.wait_for_result()
+                yield self._wait_for_result()
 
             self._submit_task(task)
 
         while len(self.completed_tasks) < self._submitted_task_count:
-            yield self.wait_for_result()
+            yield self._wait_for_result()
 
         self._executor.join()
 
@@ -138,11 +162,16 @@ class TaskManager:
             self._results_queue.put(complete_task)
 
     def join(self) -> None:
+        """Block until all tasks are completed.
+
+        Alternatively use the task manager as a context manager,
+        upon exiting join will be called and results will be available
+        """
         while len(self.completed_tasks) < self._submitted_task_count:
-            self.wait_for_result()
+            self._wait_for_result()
         self._executor.join()
 
-    def wait_for_result(self) -> Task:
+    def _wait_for_result(self) -> Task:
         """Gather result from a submitted tasks."""
         completed_task = self._results_queue.get(block=True)
         logger.debug("Gathering result for completed task %r", completed_task)

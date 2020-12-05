@@ -82,11 +82,23 @@ class _FutureProofExecutor:
 
 
 class ThreadPoolExecutor(_FutureProofExecutor):
+    """Wrapper around concurrent.futures ThreadPoolExecutor.
+
+    Arguments will be forwarded to it.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(futures.ThreadPoolExecutor, *args, **kwargs)
 
 
 class ProcessPoolExecutor(_FutureProofExecutor):
+    """Wrapper around concurrent.futures ProcessPoolExecutor.
+
+    Available only in Python 3.7 and above.
+
+    Arguments will be forwarded to it.
+    """
+
     def __init__(self, *args, **kwargs):
         if sys.version_info < (3, 7):
             raise NotImplementedError(

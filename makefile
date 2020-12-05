@@ -1,4 +1,4 @@
-.PHONY: install-dev tests tests-coverage release-test release-pypi
+.PHONY: install-dev tests tests-coverage release-test release-pypi docs-server
 
 install-dev:
 	pip install -U pip setuptools wheel
@@ -25,3 +25,6 @@ release-pypi: package
 		read ans && \
 		[ $${ans:-N} = y ] && \
 		twine upload dist/*
+
+docs-server:
+	sphinx-autobuild docs docs/_build/html
