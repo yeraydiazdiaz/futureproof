@@ -1,4 +1,8 @@
-.PHONY: tests tests-coverage release-test release-pypi
+.PHONY: install-dev tests tests-coverage release-test release-pypi
+
+install-dev:
+	pip install -U pip setuptools wheel
+	pip install -r requirements-dev.txt
 
 tests:
 	pytest -x -m 'not slow' && pytest -x -m slow
