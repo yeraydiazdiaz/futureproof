@@ -58,6 +58,6 @@ setup(
     include_package_data=True,
     keywords="concurrent futures multithreading",
     classifiers=CLASSIFIERS,
-    install_requires=["attrs"],
+    install_requires=["attrs>=20.0.0"],
     extras_require=EXTRAS_REQUIRE,
 )

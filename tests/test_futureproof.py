@@ -210,3 +210,13 @@ def test_process_pool_executor_3_7_only(mocker):
 
     mock_version.version_info = (3, 7, 0)
     assert futureproof.ProcessPoolExecutor()
+
+
+def test_submit_returns_task():
+    executor = conftest.get_executor_for_type()
+    tm = futureproof.TaskManager(executor)
+
+    task = tm.submit(custom_sum, 1, 1)
+    assert task is not None
+    tasks = {task: "foo"}
+    assert tasks[task] == "foo"

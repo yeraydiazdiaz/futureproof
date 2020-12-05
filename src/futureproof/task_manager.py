@@ -19,7 +19,7 @@ class ErrorPolicyEnum(Enum):
     RAISE = "raise"
 
 
-@attr.s
+@attr.s(eq=False)
 class Task:
     """Tasks describe an execution with parameters.
 
@@ -70,10 +70,11 @@ class TaskManager:
         with self._completed_tasks_lock:
             return [task.result for task in self.completed_tasks if task.complete]
 
-    def submit(self, fn: Callable, *args: Any, **kwargs: Any) -> None:
+    def submit(self, fn: Callable, *args: Any, **kwargs: Any) -> Task:
         """Submit a task for execution."""
         task = Task(fn, args, kwargs)
         self._tasks = chain(self._tasks, [task])
+        return task
 
     def map(self, fn: Callable, iterable: Iterable) -> None:
         """Submit a set of tasks from a callable and a iterable of arguments
