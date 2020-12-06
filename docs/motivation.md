@@ -85,9 +85,9 @@ executor = futureproof.FutureProofExecutor(max_workers=5)
 with futureproof.TaskManager(executor, error_policy="log") as tm:
     for url in URLS:
         tm.submit(load_url, url, 60)
-        for task in tm.as_completed():
-            if not isinstance(task.result, Exception):
-                print("%r page is %d bytes" % (task.args[0], len(task.result)))
+    for task in tm.as_completed():
+        if not isinstance(task.result, Exception):
+            print("%r page is %d bytes" % (task.args[0], len(task.result)))
 ```
 
 Note we've added a check to only print the result in case it's not an exception, this outputs:
