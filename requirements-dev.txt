@@ -1,4 +1,4 @@
--e .[tests]
+-e .[dev]
 black
 flake8
 isort
@@ -8,7 +8,3 @@ pdbpp
 wheel
 twine
 tox
-sphinx
-sphinx-autobuild
-myst-parser
-furo
