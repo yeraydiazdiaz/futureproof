@@ -179,7 +179,8 @@ issue creeps in.
 
 Under the hood `concurrent.futures` uses queues to store the jobs, including
 the function and its arguments. It does it right at the start, for _all_ the
-jobs, which means that, in high job count situations, the queue grows very large and the main thread can hang and become unresponsive.
+jobs, which means that, in high job count situations, the queue grows very large
+and the main thread can hang and become unresponsive.
 
 A simple example:
 
@@ -195,10 +196,10 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
 ```
 
 Running this simple function with a billion times will result in the CPU maxing
-out and the memory usage will increase dramatically, **before a single job
-is executed**. Again, this all happens without any logging or output, and, to
-make things worse, a keyboard interrupt will not immediately exit so you'll have
-to hit it repeatedly forcing the threads to exit in an unclean state.
+out and the memory usage will increase dramatically. Again, this all happens
+without any logging or output, and, to make things worse, a keyboard interrupt
+will not immediately exit so you'll have to hit it repeatedly forcing the threads
+to exit in an unclean state.
 
 Let's compare this to `futureproof`:
 

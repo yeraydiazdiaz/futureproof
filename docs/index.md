@@ -14,7 +14,7 @@ Futureproof is a thin wrapper around it addressing some of these problems and ad
 
 ## Features:
 
-- **Monitoring**: a summary of completed tasks is logged by default.
+- **Monitoring**: a summary of recent completed tasks is logged by default.
 - **Fail fast**: errors cause the main thread to raise an exception and stop by default.
 - **Error policy**: the user can decide whether to raise, log or completely ignore errors on tasks.
 - **Backpressure control**: large collections of tasks are consumed lazily as the executor completes tasks, drastically reducing memory consumption and improving responsiveness in these situations.
