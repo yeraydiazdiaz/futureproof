@@ -83,10 +83,13 @@ class _FutureProofExecutor:
 class ThreadPoolExecutor(_FutureProofExecutor):
     """Wrapper around concurrent.futures ThreadPoolExecutor.
 
-    Arguments will be forwarded to it.
+    Arguments not specified below will be forwarded to the underlying executor.
+
+    :param monitor_interval: Frequency in seconds for monitor logging, defaults
+        to 2 seconds, set to 0 to disable.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, monitor_interval=2, **kwargs):
         super().__init__(futures.ThreadPoolExecutor, *args, **kwargs)
 
 
@@ -95,10 +98,13 @@ class ProcessPoolExecutor(_FutureProofExecutor):
 
     Available only in Python 3.7 and above.
 
-    Arguments will be forwarded to it.
+    Arguments not specified below will be forwarded to the underlying executor.
+
+    :param monitor_interval: Frequency in seconds for monitor logging, defaults
+        to 2 seconds, set to 0 to disable.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, monitor_interval=2, **kwargs):
         if sys.version_info < (3, 7):
             raise NotImplementedError(
                 "ProcessPoolExecutor are only available for Python 3.7+"
