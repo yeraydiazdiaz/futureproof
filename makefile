@@ -5,10 +5,10 @@ install-dev:
 	pip install -r requirements-dev.txt
 
 tests:
-	pytest -x -m 'not slow' && pytest -x -m slow
-
-tests-coverage:
-	coverage run -m pytest && coverage report
+	coverage run --parallel-mode -m pytest -x -m 'not slow' && \
+	coverage run --parallel-mode -m pytest -x -m 'slow' && \
+	coverage combine && \
+	coverage report
 
 package:
 	rm -fr dist/*
