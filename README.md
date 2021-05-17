@@ -1,9 +1,11 @@
 # Futureproof - Bulletproof concurrent.futures
 
 [![Documentation Status](https://readthedocs.org/projects/futureproof/badge/?version=latest)](https://futureproof.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://dev.azure.com/yeraydiazdiaz/futureproof/_apis/build/status/yeraydiazdiaz.futureproof?branchName=master)](https://dev.azure.com/yeraydiazdiaz/futureproof/_build/latest?definitionId=1&branchName=master)
+[![Build Status](https://github.com/yeraydiazdiaz/futureproof/workflows/CI/badge.svg?branch=master)](https://github.com/yeraydiazdiaz/futureproof/actions?workflow=CI)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/futureproof.svg)](https://pypi.org/project/futureproof/)
 [![PyPI](https://img.shields.io/pypi/v/futureproof.svg)](https://pypi.org/project/futureproof/)
+[![codecov](https://codecov.io/gh/yeraydiazdiaz/futureproof/branch/master/graph/badge.svg)](https://codecov.io/gh/yeraydiazdiaz/futureproof)
+[![Read the Docs](https://img.shields.io/readthedocs/futureproof.svg)](http://futureproof.readthedocs.io/en/latest/)
 
 [`concurrent.futures`](https://docs.python.org/3/library/concurrent.futures.html) is amazing, but it's got some sharp edges that have bit me many times in the past.
 
