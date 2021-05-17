@@ -41,7 +41,7 @@ class _FutureProofExecutor:
 
     def submit(self, fn, *args, **kwargs):
         """Create a future invoking fn with the specified args and kwargs"""
-        if self._monitor_future is None:
+        if self._monitor_future is None and self._monitor_interval != 0:
             self._monitor_future = self._executor.submit(self.monitor)
 
         fut = self._executor.submit(fn, *args, **kwargs)
