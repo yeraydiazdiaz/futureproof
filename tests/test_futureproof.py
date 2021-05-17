@@ -158,7 +158,7 @@ def test_map_lazy_generator():
     assert list(range(1, 101)) == sorted(tm.results)
 
 
-@pytest.mark.timeout(4)
+@pytest.mark.timeout(10)
 def test_submit_after_map():
     executor = conftest.get_executor_for_type()
     fn = partial(custom_sum, b=1)
@@ -170,7 +170,7 @@ def test_submit_after_map():
     assert list(range(1, 11)) == sorted(tm.results)
 
 
-@pytest.mark.timeout(4)
+@pytest.mark.timeout(10)
 def test_map_after_submit():
     executor = conftest.get_executor_for_type()
     fn = partial(custom_sum, b=1)
