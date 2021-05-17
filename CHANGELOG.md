@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add `monitor_interval` kwarg to FutureProofExecutor allowing the user to
+configure the frequency of monitor logging.
+
 ## 0.2.3
 
 - Add support for Python 3.9

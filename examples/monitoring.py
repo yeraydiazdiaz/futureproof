@@ -23,15 +23,15 @@ logger = logging.getLogger(__name__)
 
 
 def delayed_sum(a, b):
-    time.sleep(random() + 5)
+    time.sleep(random() + 3)
     return a + b
 
 
 def with_futureproof():
     logger.info("Starting test")
-    ex = futureproof.FutureProofExecutor(max_workers=2)
+    ex = futureproof.ThreadPoolExecutor(max_workers=2, monitor_interval=5)
     with futureproof.TaskManager(ex) as tm:
-        for i in range(50):
+        for i in range(10):
             tm.submit(delayed_sum, i, 1)
         for task in tm.as_completed():
             print(task.result)
