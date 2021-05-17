@@ -114,7 +114,7 @@ class TaskManager:
             pass
 
     def as_completed(self) -> Iterator[Task]:
-        """Start the manager and return an interator of completed tasks.
+        """Start the manager and return an iterator of completed tasks.
 
         When using the task manager as a context manager as_completed must be used
         *inside* the context, otherwise there will be no effect as the task manager
@@ -156,6 +156,7 @@ class TaskManager:
         try:
             complete_task.result = future.result()
         except Exception as exc:
+            logger.debug("Exception on task %r", complete_task)
             complete_task.result = exc
         finally:
             logger.debug("Completed task %r", complete_task)

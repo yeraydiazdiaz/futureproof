@@ -17,6 +17,7 @@ class _FutureProofExecutor:
     def __init__(self, executor_cls, *args, monitor_interval=2, **kwargs):
         self._executor = executor_cls(*args, **kwargs)  # type: futures.Executor
         self._monitor_interval = monitor_interval  # type: int
+        self._log = logger.info if self._monitor_interval != 0 else logger.debug
         self._current_futures = set()  # type: set
         self._current_futures_lock = Lock()  # type: Lock
         self._monitor_future = None  # type: futures.Future
@@ -41,7 +42,7 @@ class _FutureProofExecutor:
 
     def submit(self, fn, *args, **kwargs):
         """Create a future invoking fn with the specified args and kwargs"""
-        if self._monitor_future is None and self._monitor_interval != 0:
+        if self._monitor_future is None:
             self._monitor_future = self._executor.submit(self.monitor)
 
         fut = self._executor.submit(fn, *args, **kwargs)
@@ -52,26 +53,28 @@ class _FutureProofExecutor:
 
     def monitor(self):
         try:
-            logger.info("Starting executor monitor")
+            self._log("Starting executor monitor")
             while True:
                 if not self._current_futures:
                     if self._executor._shutdown:
                         return
                     else:
-                        logger.debug("No current futures")
+                        self._log("No current futures")
                         time.sleep(0.01)
                 else:
                     start = time.time()
+                    # TODO: if all current futures complete under the interval
+                    # we log with a lower time which sounds incorrect
                     done, pending = futures.wait(
                         list(self._current_futures), self._monitor_interval
                     )
-                    logger.info(
+                    self._log(
                         "%d task completed in the last %.2f second(s)",
                         len(done),
                         time.time() - start,
                     )
                     if self._executor._shutdown:
-                        logger.info("Shutting down monitor...")
+                        self._log("Shutting down monitor...")
                         return
                     with self._current_futures_lock:
                         for f in done:
