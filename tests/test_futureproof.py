@@ -239,7 +239,9 @@ def test_monitor_logging(mocker):
 
     assert exception_spy.call_count == 0
     assert spy.call_args_list[0][0] == ("Starting executor monitor",)
-    assert spy.call_args_list[1][0][0] == "%d task(s) completed in the last %.2f seconds"
+    assert (
+        spy.call_args_list[1][0][0] == "%d task(s) completed in the last %.2f seconds"
+    )
 
 
 @pytest.mark.timeout(5)
@@ -254,8 +256,12 @@ def test_monitor_interval(mocker):
 
     assert exception_spy.call_count == 0
     assert spy.call_args_list[0][0] == ("Starting executor monitor",)
-    assert spy.call_args_list[1][0][0] == "%d task(s) completed in the last %.2f seconds"
-    assert spy.call_args_list[2][0][0] == "%d task(s) completed in the last %.2f seconds"
+    assert (
+        spy.call_args_list[1][0][0] == "%d task(s) completed in the last %.2f seconds"
+    )
+    assert (
+        spy.call_args_list[2][0][0] == "%d task(s) completed in the last %.2f seconds"
+    )
 
 
 @pytest.mark.timeout(5)
