@@ -20,7 +20,9 @@ class _FutureProofExecutor:
         self._log = logger.info if self._monitor_interval != 0 else logger.debug
         self._current_futures = set()  # type: set
         self._current_futures_lock = Lock()  # type: Lock
+        self._monitor_count = 0  # type: int
         self._monitor_future = None  # type: futures.Future
+        self._monitor_lock = Lock()  # type: Lock
 
     def __enter__(self):
         return self
@@ -43,42 +45,51 @@ class _FutureProofExecutor:
     def submit(self, fn, *args, **kwargs):
         """Create a future invoking fn with the specified args and kwargs"""
         if self._monitor_future is None:
+            # TODO: we're taking up a worker for monitoring without alerting the user
+            # This is especially bad in the case of a ProcessExecutor
             self._monitor_future = self._executor.submit(self.monitor)
 
         fut = self._executor.submit(fn, *args, **kwargs)
+        fut.add_done_callback(self._cb)
         with self._current_futures_lock:
             self._current_futures.add(fut)
-
         return fut
 
+    def _cb(self, future):
+        with self._current_futures_lock:
+            self._current_futures.remove(future)
+        with self._monitor_lock:
+            self._monitor_count += 1
+
     def monitor(self):
+        """Monitor task checking on the status of the futures and logging the progress."""
         try:
             self._log("Starting executor monitor")
             while True:
+                # If there are no futures being processed we check if we're
+                # shutting down or eagerly wait for more futures
                 if not self._current_futures:
                     if self._executor._shutdown:
                         return
                     else:
-                        self._log("No current futures")
+                        logger.debug("No current futures")
                         time.sleep(0.01)
                 else:
                     start = time.time()
-                    # TODO: if all current futures complete under the interval
-                    # we log with a lower time which sounds incorrect
-                    done, pending = futures.wait(
-                        list(self._current_futures), self._monitor_interval
-                    )
-                    self._log(
-                        "%d task completed in the last %.2f second(s)",
-                        len(done),
-                        time.time() - start,
-                    )
+                    previous_count = self._monitor_count
+
+                    time.sleep(self._monitor_interval)
+
+                    with self._monitor_lock:
+                        self._log(
+                            "%d task(s) completed in the last %.2f seconds",
+                            self._monitor_count - previous_count,
+                            time.time() - start,
+                        )
+
                     if self._executor._shutdown:
                         self._log("Shutting down monitor...")
                         return
-                    with self._current_futures_lock:
-                        for f in done:
-                            self._current_futures.remove(f)
         except Exception:
             logger.exception("Error in monitor")
 
@@ -93,7 +104,12 @@ class ThreadPoolExecutor(_FutureProofExecutor):
     """
 
     def __init__(self, *args, monitor_interval=2, **kwargs):
-        super().__init__(futures.ThreadPoolExecutor, *args, **kwargs)
+        super().__init__(
+            futures.ThreadPoolExecutor,
+            *args,
+            monitor_interval=monitor_interval,
+            **kwargs
+        )
 
 
 class ProcessPoolExecutor(_FutureProofExecutor):
@@ -112,7 +128,12 @@ class ProcessPoolExecutor(_FutureProofExecutor):
             raise NotImplementedError(
                 "ProcessPoolExecutor are only available for Python 3.7+"
             )
-        super().__init__(futures.ProcessPoolExecutor, *args, **kwargs)
+        super().__init__(
+            futures.ProcessPoolExecutor,
+            *args,
+            monitor_interval=monitor_interval,
+            **kwargs
+        )
 
     def join(self):
         logger.debug("Shutting down executor")
