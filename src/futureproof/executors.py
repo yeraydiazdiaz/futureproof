@@ -14,10 +14,9 @@ class _FutureProofExecutor:
     Do not use this class directly, use either ThreadPoolExecutor or ProcessPoolExecutor.
     """
 
-    TIMEOUT = 2  # TODO: allow parametrizing and disabling the monitor
-
-    def __init__(self, executor_cls, *args, **kwargs):  # TODO: use only 3.7 [kw]args?
+    def __init__(self, executor_cls, *args, monitor_interval=2, **kwargs):
         self._executor = executor_cls(*args, **kwargs)  # type: futures.Executor
+        self._monitor_interval = monitor_interval  # type: int
         self._current_futures = set()  # type: set
         self._current_futures_lock = Lock()  # type: Lock
         self._monitor_future = None  # type: futures.Future
@@ -64,7 +63,7 @@ class _FutureProofExecutor:
                 else:
                     start = time.time()
                     done, pending = futures.wait(
-                        list(self._current_futures), self.TIMEOUT
+                        list(self._current_futures), self._monitor_interval
                     )
                     logger.info(
                         "%d task completed in the last %.2f second(s)",

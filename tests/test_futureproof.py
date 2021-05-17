@@ -229,12 +229,29 @@ def test_submit_returns_task():
 def test_monitor_logging(mocker):
     executor = conftest.get_executor_for_type()
     spy = mocker.spy(futureproof.executors.logger, "info")
+    exception_spy = mocker.spy(futureproof.executors.logger, "exception")
     tm = futureproof.TaskManager(executor)
 
     # the default monitoring interval is 2 seconds
     tm.submit(custom_sum, 1, 1, delay=2)
     tm.run()
 
-    spy.call_args_list
+    assert exception_spy.call_count == 0
     assert spy.call_args_list[0][0] == ("Starting executor monitor",)
     assert spy.call_args_list[1][0][0] == "%d task completed in the last %.2f second(s)"
+
+
+@pytest.mark.timeout(5)
+def test_monitor_interval(mocker):
+    executor = conftest.get_executor_for_type(monitor_interval=1)
+    spy = mocker.spy(futureproof.executors.logger, "info")
+    exception_spy = mocker.spy(futureproof.executors.logger, "exception")
+    tm = futureproof.TaskManager(executor)
+
+    tm.submit(custom_sum, 1, 1, delay=2)
+    tm.run()
+
+    assert exception_spy.call_count == 0
+    assert spy.call_args_list[0][0] == ("Starting executor monitor",)
+    assert spy.call_args_list[1][0][0] == "%d task completed in the last %.2f second(s)"
+    assert spy.call_args_list[2][0][0] == "%d task completed in the last %.2f second(s)"
