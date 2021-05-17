@@ -50,9 +50,10 @@ class _FutureProofExecutor:
             self._monitor_future = self._executor.submit(self.monitor)
 
         fut = self._executor.submit(fn, *args, **kwargs)
-        fut.add_done_callback(self._cb)
         with self._current_futures_lock:
             self._current_futures.add(fut)
+        # NOTE: done callbacks will be executed immediately if the future is complete
+        fut.add_done_callback(self._cb)
         return fut
 
     def _cb(self, future):

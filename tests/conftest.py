@@ -16,14 +16,14 @@ def get_executor_for_type(*args, **kwargs):
 
 
 def get_thread_executor(*args, request=None, **kwargs):
-    kwargs.setdefault("max_workers", 2)
+    kwargs.setdefault("max_workers", 3)
     if request and sys.version_info >= (3, 6):
         kwargs["thread_name_prefix"] = request.function.__name__
     return futureproof.ThreadPoolExecutor(*args, **kwargs)
 
 
 def get_process_executor(*args, **kwargs):
-    kwargs.setdefault("max_workers", 2)
+    kwargs.setdefault("max_workers", 3)
     return futureproof.ProcessPoolExecutor(*args, **kwargs)
 
 
