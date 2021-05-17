@@ -6,6 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/futureproof.svg)](https://pypi.org/project/futureproof/)
 [![codecov](https://codecov.io/gh/yeraydiazdiaz/futureproof/branch/master/graph/badge.svg)](https://codecov.io/gh/yeraydiazdiaz/futureproof)
 [![Read the Docs](https://img.shields.io/readthedocs/futureproof.svg)](http://futureproof.readthedocs.io/en/latest/)
+[![shoutouts.dev](https://shoutouts.dev/projects/yeraydiazdiaz/futureproof/badge)](https://shoutouts.dev/projects/yeraydiazdiaz/futureproof)
 
 [`concurrent.futures`](https://docs.python.org/3/library/concurrent.futures.html) is amazing, but it's got some sharp edges that have bit me many times in the past.
 
