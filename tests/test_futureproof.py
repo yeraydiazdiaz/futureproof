@@ -99,7 +99,8 @@ def test_submit_valid_functions():
 
 
 def test_submit_flaky_functions():
-    executor = conftest.get_executor_for_type()
+    # Reduce the monitor interval to avoid having time outs on the test
+    executor = conftest.get_executor_for_type(monitor_interval=0.1)
     tm = futureproof.TaskManager(executor)
 
     for i in range(1, 101):
@@ -184,7 +185,7 @@ def test_map_after_submit():
 
 @pytest.mark.timeout(3)
 def test_as_completed():
-    executor = conftest.get_executor_for_type()
+    executor = conftest.get_executor_for_type(monitor_interval=0.1)
     tm = futureproof.TaskManager(executor)
 
     for i in range(5):
