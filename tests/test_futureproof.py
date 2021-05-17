@@ -22,8 +22,11 @@ def _setup_logging():
     logger.setLevel(logging.DEBUG)
 
 
-def custom_sum(a, b):
-    time.sleep(random())
+def custom_sum(a, b, delay=0):
+    if delay:
+        time.sleep(delay)
+    else:
+        time.sleep(random())
     return a + b
 
 
@@ -220,3 +223,18 @@ def test_submit_returns_task():
     assert task is not None
     tasks = {task: "foo"}
     assert tasks[task] == "foo"
+
+
+@pytest.mark.timeout(5)
+def test_monitor_logging(mocker):
+    executor = conftest.get_executor_for_type()
+    spy = mocker.spy(futureproof.executors.logger, "info")
+    tm = futureproof.TaskManager(executor)
+
+    # the default monitoring interval is 2 seconds
+    tm.submit(custom_sum, 1, 1, delay=2)
+    tm.run()
+
+    spy.call_args_list
+    assert spy.call_args_list[0][0] == ("Starting executor monitor",)
+    assert spy.call_args_list[1][0][0] == "%d task completed in the last %.2f second(s)"
