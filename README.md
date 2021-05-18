@@ -98,7 +98,7 @@ Traceback (most recent call last):
 socket.gaierror: [Errno 8] nodename nor servname provided, or not known
 ```
 
-Notice that `futureproof` raised the exception that ocurred immediately and everything stopped, as you would've expected in normal non-threaded Python, no surprises.
+Notice that `futureproof` raised the exception immediately and everything stopped, as you would've expected in normal non-threaded Python, no surprises.
 
 If we prefer `futureproof` gives you the option to log or even ignore exceptions using error policies. Say we want to log the exceptions:
 
