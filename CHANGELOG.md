@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 
 - Add `monitor_interval` kwarg to FutureProofExecutor allowing the user to
 configure the frequency of monitor logging.
