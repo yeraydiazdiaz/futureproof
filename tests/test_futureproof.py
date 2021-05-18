@@ -1,3 +1,4 @@
+import os
 import logging
 import time
 from functools import partial
@@ -226,6 +227,10 @@ def test_submit_returns_task():
     assert tasks[task] == "foo"
 
 
+@pytest.mark.skipif(
+    os.getenv("EXECUTOR_TYPE") != "thread",
+    reason="We cannot mock logging across processes",
+)
 @pytest.mark.timeout(5)
 def test_monitor_logging(mocker):
     spy = mocker.spy(futureproof.executors.logger, "info")
@@ -244,6 +249,10 @@ def test_monitor_logging(mocker):
     )
 
 
+@pytest.mark.skipif(
+    os.getenv("EXECUTOR_TYPE") != "thread",
+    reason="We cannot mock logging across processes",
+)
 @pytest.mark.timeout(5)
 def test_monitor_interval(mocker):
     spy = mocker.spy(futureproof.executors.logger, "info")
@@ -264,6 +273,10 @@ def test_monitor_interval(mocker):
     )
 
 
+@pytest.mark.skipif(
+    os.getenv("EXECUTOR_TYPE") != "thread",
+    reason="We cannot mock logging across processes",
+)
 @pytest.mark.timeout(5)
 def test_monitor_interval_disabled(mocker):
     spy = mocker.spy(futureproof.executors.logger, "info")
@@ -274,5 +287,7 @@ def test_monitor_interval_disabled(mocker):
     tm.submit(custom_sum, 1, 1, delay=2)
     tm.run()
 
+    assert exception_spy.call_count == 0
+    assert spy.call_count == 0
     assert exception_spy.call_count == 0
     assert spy.call_count == 0

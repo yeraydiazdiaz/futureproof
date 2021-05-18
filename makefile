@@ -7,8 +7,14 @@ install-dev:
 tests:
 	coverage run --parallel-mode -m pytest -x -m 'not slow' && \
 	coverage run --parallel-mode -m pytest -x -m 'slow' && \
+	EXECUTOR_TYPE=process coverage run --parallel-mode -m pytest -x -m 'not slow' && \
+	EXECUTOR_TYPE=process coverage run --parallel-mode -m pytest -x -m 'slow' && \
 	coverage combine && \
 	coverage report
+
+tests-process:
+	EXECUTOR_TYPE=process pytest -x -m 'not slow' && \
+	EXECUTOR_TYPE=process pytest -x -m 'slow'
 
 package:
 	rm -fr dist/*
