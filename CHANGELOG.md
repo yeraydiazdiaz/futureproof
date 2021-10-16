@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add support for Python 3.10
+
 ## 0.3.0
 
 - Add `monitor_interval` kwarg to FutureProofExecutor allowing the user to
