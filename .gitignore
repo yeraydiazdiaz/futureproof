@@ -11,3 +11,5 @@ dist/
 coverage.xml
 .dev
 docs/_build
+.tool-versions
+.envrc
